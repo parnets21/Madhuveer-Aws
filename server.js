@@ -27,7 +27,7 @@ app.use(
   cors({
     origin: [
       "https://hotelviratrestaurant.netlify.app",
-      "https://hotelvirat.netlify.app",
+      "https://madhuveer.com",
       "http://localhost:5173",
     ], // your frontend domain
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -37,11 +37,7 @@ app.use(
 );
 
 // Define the rate limiter
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 500, // Limit each IP to 500 requests per windowMs
-  message: "Too many requests from this IP, please try again after 15 minutes",
-});
+
 app.use(limiter);
 
 // Use morgan for logging
@@ -70,7 +66,8 @@ app.use(
         "img-src": [
           "'self'",
           "data:",
-          "http://localhost:3000",
+          "http://localhost:3000", 
+          "https://madhuveer.com",
           "http://localhost:5173",
           "https://hotelviratrestaurant.netlify.app",
           "https://hotelvirat.com",
@@ -704,14 +701,22 @@ app.use("/api/v1/sitesupervisor/budget", siteSupervisorBudgetRoutes);
 app.use("/api/v1/sitesupervisor/progress", siteSupervisorProgressRoutes);
 
 // Health check endpoint
-app.get("/health", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Server is running",
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-  });
-});
+// app.get("/health", (req, res) => {
+//   res.status(200).json({
+//     success: true,
+//     message: "Server is running",
+//     timestamp: new Date().toISOString(),
+//     uptime: process.uptime(),
+//   });
+// });
+ 
+app.use(express.static(path.join(__dirname, 'build'))); // Change 'build' to your frontend folder if needed
+
+// Redirect all requests to the index.html file
+
+app.get("*", (req, res) => {
+  return  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+}); 
 
 // Construction
 app.use("/hotel/purchase-user-auth", purchaseUserRoutes);
@@ -722,20 +727,10 @@ app.use("/hotel/store-location", storeLocationRoutes);
 app.use("/config/configuration", configurationRoutes);
 app.use("/config/employee", employeeRoutes);
 app.use("/config/leave", leaveRoutes);
-// app.use("/report", reportRoutes);
-// app.use("/construction/sales", salesRoutes);
-// app.use("/construction/ClientRoutes",ClientRoutes)
-// app.use("/construction/client", constructionClientRoutes)
-// app.use("/construction/index", constructionIndex)
-
-// app.use("/construction/client", constructionClientRoutes);
-// app.use("/construction/project", constructionProjectRoutes);
 app.use("/construction/work-orders", constructionWorkOrderRoutes);
 app.use("/construction/Invoice", constructionInvoiceRoutes);
 app.use("/construction/Payment", constructionPaymentRoutes);
-// app.use("/construction/Project", constructionProjectRoutes)
-// app.use("/construction/Report", constructionReportRoutes)
-// app.use("/construction/Settings", constructionSettingsRoutes)
+
 app.use("/construction/vendor", vendorRoutes);
 app.use("/construction/po/vendor", vendorRoutes); // For PurchaseAccountant component
 app.use("/construction/po", purchaseRoutes); // For PurchaseAdmin component - maps to purchase-orders
@@ -744,16 +739,12 @@ app.use("/construction/payslipcons", PayslipCons);
 app.use("/construction/indents", indentRoutes);
 app.use("/construction/dashboard", dashboardRoutes);
 
-// app.use("/construction/work-orders", constructionWorkOrderRoutes);
+
 app.use("/construction/task", taskRoutes);
 app.use("/construction/alert", alertRoutes);
 app.use("/construction/daily-report", dailyReportRoutes);
 
-// app.use("/construction/construction-Invoice", constructionInvoiceRoutes)
-// app.use("/construction/construction-Payment", constructionPaymentRoutes)
-// app.use("/construction/construction-Project", constructionProjectRoutes)
-// app.use("/construction/construction-Report", constructionReportRoutes)
-// app.use("/construction/construction-Settings", constructionSettingsRoutes)
+
 app.use("/construction/supervisorexpense", supervisorExpenseRoutes);
 app.use("/construction/major", majorExpenseRoutes);
 app.use("/api/accountant", accountantExpenseRoutes);
@@ -911,7 +902,7 @@ app.use("/api/v1/hotel/vendor", vendorRoutes); // Vendor management routes
 
 
 
-// Purchase Management Routes (using existing purchaseRoutes from line 175)
+
 
 app.use("/api/v1/purchase", purchaseRoutes); // Purchase management routes (Quotation, PO, GRN, Invoice)
 
@@ -921,17 +912,12 @@ app.use("/api/v1/leaves", leaveRoutes);
 
 
 
-// app.use("/api/v1/construction/Invoice", constructionInvoiceRoutes)
-
-// app.use("/api/v1/costruction/vendor", Vendor)
-
 app.use("/api/v1/construction/attendanceCons", attendanceConsRoutes);
 
 app.use("/api/v1/construction/payslipcons", PayslipCons);
 
 
 
-// HRS (Human Resource System) Routes - using existing leaveRoutes
 
 app.use("/api/v1/leaves", leaveRoutes); // Using already declared leaveRoutes
 
@@ -1007,21 +993,7 @@ app.use("/config/employee", employeeRoutes);
 
 app.use("/config/leave", leaveRoutes);
 
-// app.use("/report", reportRoutes);
 
-// app.use("/construction/sales", salesRoutes);
-
-// app.use("/construction/ClientRoutes",ClientRoutes)
-
-// app.use("/construction/client", constructionClientRoutes)
-
-// app.use("/construction/index", constructionIndex)
-
-
-
-// app.use("/construction/client", constructionClientRoutes);
-
-// app.use("/construction/project", constructionProjectRoutes);
 
 app.use("/construction/work-orders", constructionWorkOrderRoutes);
 
@@ -1029,11 +1001,7 @@ app.use("/construction/Invoice", constructionInvoiceRoutes);
 
 app.use("/construction/Payment", constructionPaymentRoutes);
 
-// app.use("/construction/Project", constructionProjectRoutes)
 
-// app.use("/construction/Report", constructionReportRoutes)
-
-// app.use("/construction/Settings", constructionSettingsRoutes)
 
 app.use("/construction/vendor", vendorRoutes);
 
@@ -1061,15 +1029,7 @@ app.use("/construction/daily-report", dailyReportRoutes);
 
 
 
-// app.use("/construction/construction-Invoice", constructionInvoiceRoutes)
 
-// app.use("/construction/construction-Payment", constructionPaymentRoutes)
-
-// app.use("/construction/construction-Project", constructionProjectRoutes)
-
-// app.use("/construction/construction-Report", constructionReportRoutes)
-
-// app.use("/construction/construction-Settings", constructionSettingsRoutes)
 
 app.use("/construction/supervisorexpense", supervisorExpenseRoutes);
 
