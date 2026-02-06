@@ -52,21 +52,75 @@ app.use((req, res, next) => {
   }
   next();
 });
-app.use(
+// app.use(
+//   helmet({
+//     contentSecurityPolicy: {
+//       useDefaults: true,
+//       directives: {
+//         "img-src": [
+//           "'self'",
+//           "data:",
+//           "http://localhost:3000", 
+//           "https://madhuveer.com",
+//           "http://localhost:5173",
+//           "https://hotelviratrestaurant.netlify.app",
+//           "https://hotelvirat.com",
+//           "https://hotelvirat.netlify.app",
+//         ],
+//       },
+//     },
+//     crossOriginResourcePolicy: { policy: "cross-origin" },
+//   })
+// );
+  
+ app.use(
   helmet({
     contentSecurityPolicy: {
       useDefaults: true,
       directives: {
+        "default-src": ["'self'"],
+
         "img-src": [
           "'self'",
           "data:",
-          "http://localhost:3000", 
+          "blob:",
+          "https:",
+          "http:",
           "https://madhuveer.com",
-          "http://localhost:5173",
-          "https://hotelviratrestaurant.netlify.app",
           "https://hotelvirat.com",
           "https://hotelvirat.netlify.app",
+          "https://hotelviratrestaurant.netlify.app",
+          "http://localhost:5173",
+          "http://localhost:3000"
         ],
+
+        "connect-src": [
+          "'self'",
+          "data:",
+          "blob:",
+          "https:",
+          "http:"
+        ],
+
+        "media-src": [
+          "'self'",
+          "blob:",
+          "data:",
+          "https:",
+          "http:"
+        ],
+
+        "worker-src": [
+          "'self'",
+          "blob:",
+          "data:"
+        ],
+
+        "frame-src": [
+          "'self'",
+          "blob:",
+          "data:"
+        ]
       },
     },
     crossOriginResourcePolicy: { policy: "cross-origin" },
