@@ -260,7 +260,7 @@ const downloadSalarySlip = async (req, res) => {
   }
 };
 
-// View salary slip as HTML
+// View salary slip as PDF
 const viewSalarySlip = async (req, res) => {
   try {
     const salarySlip = await SalarySlip.findById(req.params.id).populate(
@@ -275,8 +275,33 @@ const viewSalarySlip = async (req, res) => {
       });
     }
 
+    // Generate PDF
     const html = generateSalarySlipHTML(salarySlip);
-    res.send(html);
+    
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: 'networkidle0' });
+    
+    const pdfBuffer = await page.pdf({
+      format: 'A4',
+      printBackground: true,
+      margin: {
+        top: '20px',
+        right: '20px',
+        bottom: '20px',
+        left: '20px'
+      }
+    });
+    
+    await browser.close();
+
+    // Set headers for PDF
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="salary-slip-${salarySlip.employeeName}-${salarySlip.month}-${salarySlip.year}.pdf"`);
+    res.send(pdfBuffer);
   } catch (error) {
     console.error("Error viewing salary slip:", error);
     res.status(500).json({
