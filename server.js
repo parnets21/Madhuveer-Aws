@@ -23,18 +23,12 @@ app.use(express.json());
 app.use(cors());
 
 // Enable CORS with specific frontend domain
-app.use(
-  cors({
-    origin: [
-      "https://hotelviratrestaurant.netlify.app",
-      "https://madhuveer.com",
-      "http://localhost:5173",
-    ], // your frontend domain
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true, // allow cookies/headers if needed
-  })
-);
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
+
 
 // Define the rate limiter
 
