@@ -38,7 +38,7 @@ app.use(
 
 // Define the rate limiter
 
-app.use(limiter);
+// app.use(limiter);
 
 // Use morgan for logging
 app.use(morgan("dev"));
