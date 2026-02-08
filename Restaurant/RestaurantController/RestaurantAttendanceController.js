@@ -231,7 +231,10 @@ const getTodayAttendance = async (req, res) => {
       employeeId: r.employee?._id,
       employeeName: r.employee?.name || r.employeeName,
       storedName: r.employeeName,
-      populated: !!r.employee
+      populated: !!r.employee,
+      punchIn: r.punchIn?.time,
+      punchOut: r.punchOut?.time,
+      status: r.status
     })));
     
     // Fix records where populate failed - use stored employeeName
@@ -293,6 +296,9 @@ const getTodayAttendance = async (req, res) => {
     const lateToday = attendanceRecords.filter((r) => r.status === "Late").length;
     // Absent count should only include employees without any attendance (not Present, Late, or Leave)
     const absentToday = absentRecords.length;
+
+    console.log("📤 Sending response with", allAttendance.length, "records");
+    console.log("Sample record with punch out:", allAttendance.find(r => r.punchOut?.time));
 
     res.json({
       success: true,
@@ -657,6 +663,11 @@ const punchOut = async (req, res) => {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
+    console.log("🔍 Looking for attendance record to punch out:", {
+      employeeId,
+      dateRange: { from: today, to: tomorrow }
+    });
+
     const attendanceRecord = await AttendanceRecord.findOne({
       employee: employeeId,
       date: {
@@ -664,6 +675,14 @@ const punchOut = async (req, res) => {
         $lt: tomorrow,
       },
     });
+
+    console.log("📋 Found attendance record:", attendanceRecord ? {
+      id: attendanceRecord._id,
+      employeeName: attendanceRecord.employeeName,
+      punchIn: attendanceRecord.punchIn?.time,
+      punchOut: attendanceRecord.punchOut?.time,
+      status: attendanceRecord.status
+    } : "NOT FOUND");
 
     if (!attendanceRecord) {
       return res.status(400).json({
@@ -680,6 +699,7 @@ const punchOut = async (req, res) => {
     }
 
     if (attendanceRecord.punchOut?.time) {
+      console.log("❌ Already punched out at:", attendanceRecord.punchOut.time);
       return res.status(400).json({
         success: false,
         message: "Already punched out today",
@@ -699,8 +719,21 @@ const punchOut = async (req, res) => {
       punchOutData.coordinates = coordinates;
     }
 
+    console.log("💾 Saving punch out data:", {
+      time: punchOutData.time,
+      location: punchOutData.location,
+      faceVerified: punchOutData.faceVerified
+    });
+
     attendanceRecord.punchOut = punchOutData;
     await attendanceRecord.save();
+
+    console.log("✅ Punch out saved successfully:", {
+      id: attendanceRecord._id,
+      punchIn: attendanceRecord.punchIn?.time,
+      punchOut: attendanceRecord.punchOut?.time,
+      workingHours: attendanceRecord.workingHours
+    });
 
     await attendanceRecord.populate(
       "employee",
@@ -713,7 +746,7 @@ const punchOut = async (req, res) => {
       attendance: attendanceRecord,
     });
   } catch (error) {
-    console.error("Error punching out:", error);
+    console.error("❌ Error punching out:", error);
     res.status(500).json({
       success: false,
       message: "Failed to punch out",

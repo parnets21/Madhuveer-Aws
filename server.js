@@ -760,10 +760,13 @@ app.use("/api/v1/sitesupervisor/progress", siteSupervisorProgressRoutes);
  
 app.use(express.static(path.join(__dirname, 'build'))); // Change 'build' to your frontend folder if needed
 
-// Redirect all requests to the index.html file
-
-app.get("*", (req, res) => {
-  return  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+// Redirect all non-API requests to the index.html file (for frontend routing)
+app.get("*", (req, res, next) => {
+  // Skip API routes and specific backend routes - let them return 404 if not found
+  if (req.path.startsWith('/api/') || req.path.startsWith('/UOM')) {
+    return next();
+  }
+  return res.sendFile(path.join(__dirname, 'build', 'index.html'));
 }); 
 
 // Construction
